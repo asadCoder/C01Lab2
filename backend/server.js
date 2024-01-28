@@ -253,7 +253,7 @@ app.patch("/editNote/:noteId", express.json(), async (req, res) => {
       // Basic body request check
       const  title  = req.body.title;
       const content  = req.body.content;
-      if (!title || !content) {
+      if (!title && !content) {
         return res
           .status(400)
           .json({ error: "Title and content are both required." });
@@ -278,13 +278,31 @@ app.patch("/editNote/:noteId", express.json(), async (req, res) => {
           .json({ error: "Note with ID noteId belonging to the user not found" });
       }
 
-      const updatedDoc = {
-        $set: {
-          title: title,
-          content: content
-        },
-      }
+      var updatedDoc = '';
 
+      if(!title){
+        updatedDoc = {
+          $set: {
+            content: content
+          },
+        }
+      }
+      else if(!content){
+        updatedDoc = {
+          $set: {
+            title: title
+          },
+        }
+      }
+      else{
+        updatedDoc = {
+          $set: {
+            title: title,
+            content: content
+          },
+        }
+      }
+      
       const filter = { _id: new ObjectId(noteId), };      
       const updatedResult = await collection.updateOne(filter, updatedDoc);
       return res.status(200).json({response: "Document with ID " + noteId + " properly updated."});
